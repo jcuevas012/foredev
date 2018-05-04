@@ -1,2 +1,6 @@
 node_modules/
 config.js
+server/.DS_Store
+.DS_Store
+client/package-lock.json
+server/package-lock.json
