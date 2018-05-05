@@ -18,10 +18,9 @@ const BookType = new GraphQLObjectType({
         genre: { type: GraphQLString},
         author: {
             type: AuthorType,
-            resolve: (parent, args) => {
-                return Author.findById(parent.authorId, (err, data) => {
-                    return data
-                })
+            resolve: async ({ authorId }, args) => {
+                const data = await Author.findById(authorId)
+                return data
             }
         }
     })
@@ -36,10 +35,9 @@ const AuthorType = new GraphQLObjectType({
         age: { type: GraphQLInt},
         books: {
             type: GraphQLList(BookType),
-            resolve: ({ id }, args) => {
-                return Book.find({ authorId: id}, (err, data) => {
-                    return data
-                })
+            resolve: async ({ id }, args) => {
+                let data = await Book.find({ authorId: id})
+                return data
             }
         }
     })
@@ -50,46 +48,35 @@ const RootQuery = new GraphQLObjectType({
     fields: {
         book: {
             type: BookType,
-            args: { id: { type: GraphQLID }},
-            resolve: (parent, args) => {
-                return Book.findById(args.id, (err, result) => {
-                    if (err) {
-                        throw new Error(err)
-                    }
-                    return result
-                })
+            args: { id: { type: new GraphQLNonNull(GraphQLID) }},
+            resolve: async (parent, args) => {
+                const data = Book.findById(args.id)
+                return data
             }
         },
+        
         author: {
             type: AuthorType,
-            args: { id: { type: GraphQLID }},
-            resolve: (parent, args ) => {
-                return Author.findById(args.id, (err, result) => {
-                    if (err) {
-                        throw new Error(err)
-                    }
-
-                    return result
-
-                })
+            args: { id: { type: new GraphQLNonNull(GraphQLID) }},
+            resolve: async (parent, args ) => {
+                const data = await Author.findById(args.id)
+                return data
             }
         },
 
         books: {
             type: GraphQLList(BookType),
-            resolve: (parent, args) => {
-                return Book.find({}, (err, data) => {
-                    return data
-                })
+            resolve: async (parent, args) => {
+               const data = await Book.find()
+               return data
             }
         },
 
         authors: {
             type: GraphQLList(AuthorType),
-            resolve: (parent, args) => {
-                return Author.find({}, (err, data) => {
-                    return data
-                })
+            resolve: async (parent, args) => {
+                const data = await Author.find()
+                return data
             }
         }
     }
@@ -121,9 +108,10 @@ const Mutation = new GraphQLObjectType({
             args: {
                 name: {type: new GraphQLNonNull(GraphQLString)},
                 genre: {type: new GraphQLNonNull(GraphQLString)},
-                authorId: {type: GraphQLID}
+                authorId: {type: new GraphQLNonNull(GraphQLID)}
             },
             resolve: (parent, { name, genre, authorId }) => {
+                
                 let book = new Book({
                     name,
                     genre,
