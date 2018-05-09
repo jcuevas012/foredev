@@ -1,6 +1,7 @@
 const express = require('express')
 const graphqlHTTP = require('express-graphql')
 const chalk = require('chalk')
+const path = require('path')
 const cors = require('cors')
 const mongoose = require('mongoose')
 
@@ -15,7 +16,7 @@ app.use('/graphql', graphqlHTTP({
     graphiql: true
 }))
 
-
+app.use(express.static(path.join(__dirname, 'public')))
 
 mongoose.Promise = global.Promise
 mongoose.connection.once('open', () => {
@@ -24,6 +25,9 @@ mongoose.connection.once('open', () => {
 mongoose.connect(`mongodb://${db.username}:${db.passport}@ds263619.mlab.com:63619/${db.name}`)
 
 
+app.get('*', (req, res) => {
+    res.sendfile(path.join(__dirname, 'public/index.html'))
+})
 
 app.listen(port, (req, res) => {
     console.log(`${chalk.green('[started]')} app started on port ${port}`)
